@@ -1,0 +1,153 @@
+/* Reset and Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #0b0d19;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background Ambient Glows */
+.bg-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: 1;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.blob-1 {
+  background: linear-gradient(135deg, #7f00ff, #ff007f);
+  top: -10%;
+  left: -10%;
+}
+.blob-2 {
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  bottom: -10%;
+  right: -10%;
+}
+
+/* Calculator Glass Frame */
+.calculator {
+  position: relative;
+  z-index: 10;
+  width: 360px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
+  padding: 24px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4),
+              inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Screen Layout */
+.screen {
+  width: 100%;
+  padding: 20px 10px;
+  margin-bottom: 24px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 120px;
+}
+.history {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+  min-height: 24px;
+  letter-spacing: 0.5px;
+}
+.output {
+  font-size: 48px;
+  font-weight: 300;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* Smooth scrollbar for long numbers */
+.output::-webkit-scrollbar {
+  height: 3px;
+}
+.output::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* Button Layout */
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.btn {
+  height: 64px;
+  border: none;
+  outline: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Button Interactions */
+.btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+.btn:active {
+  transform: translateY(1px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Specific Button Types */
+.btn.action {
+  color: #00f2fe;
+  background: rgba(0, 242, 254, 0.05);
+}
+.btn.action:hover {
+  background: rgba(0, 242, 254, 0.15);
+}
+
+.btn.equal {
+  grid-row: span 2;
+  height: 142px;
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  color: #0b0d19;
+  font-size: 26px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 242, 254, 0.3);
+}
+.btn.equal:hover {
+  background: linear-gradient(135deg, #33f5ff, #66bfff);
+  box-shadow: 0 14px 30px rgba(0, 242, 254, 0.45);
+}
+
+.btn.zero {
+  grid-column: span 2;
+  justify-content: flex-start;
+  padding-left: 28px;
+}
