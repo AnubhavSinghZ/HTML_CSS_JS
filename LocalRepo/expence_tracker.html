@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f4;
+      --surface: #ffffff;
+      --surface2: #f1f0ee;
+      --border: rgba(0,0,0,0.12);
+      --text: #1a1a18;
+      --muted: #6b6b68;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --purple: #534AB7;
+      --green: #1D9E75;
+      --red: #D85A30;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header { margin-bottom: 1.5rem; }
+    header h1 {
+      font-size: 22px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header h1 i { color: var(--purple); font-size: 22px; }
+    header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .stat {
+      background: var(--surface2);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .stat-value { font-size: 22px; font-weight: 500; }
+    .stat-value.income { color: var(--green); }
+    .stat-value.expense { color: var(--red); }
+
+    /* Form Card */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .card h2 { font-size: 15px; font-weight: 500; margin-bottom: 1rem; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 12px; color: var(--muted); }
+    .form-group input,
+    .form-group select {
+      height: 38px;
+      padding: 0 12px;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(83,74,183,0.12);
+    }
+    .form-full { grid-column: span 2; }
+
+    .add-btn {
+      margin-top: 12px;
+      width: 100%;
+      height: 40px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      border-radius: var(--radius-md);
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .add-btn:hover { background: var(--surface2); }
+    .add-btn:active { transform: scale(0.98); }
+
+    /* Section header with filters */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-head h2 { font-size: 15px; font-weight: 500; }
+
+    .filter-btns { display: flex; gap: 6px; }
+    .flt {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 0.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .flt.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .flt:hover:not(.active) { background: var(--surface2); }
+
+    /* Transaction list */
+    .tx-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+
+    .tx {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.15s;
+    }
+    .tx:hover { border-color: rgba(0,0,0,0.25); }
+
+    .tx-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+    .tx-info { flex: 1; min-width: 0; }
+    .tx-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tx-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .tx-amount { font-size: 15px; font-weight: 500; flex-shrink: 0; }
+    .tx-amount.pos { color: var(--green); }
+    .tx-amount.neg { color: var(--red); }
+
+    .del-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      line-height: 1;
+      opacity: 0.4;
+      transition: opacity 0.15s, color 0.15s;
+      display: flex;
+    }
+    .del-btn:hover { opacity: 1; color: var(--red); }
+
+    /* Spending bars */
+    .bar-section { margin-bottom: 2rem; }
+    .bar-section h2 { font-size: 15px; font-weight: 500; margin-bottom: 1rem; }
+    .bar-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .bar-row { display: flex; flex-direction: column; gap: 5px; }
+    .bar-top { display: flex; justify-content: space-between; font-size: 13px; }
+    .bar-label { color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .bar-val { font-weight: 500; }
+    .bar-track {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .empty i { font-size: 28px; display: block; margin: 0 auto 8px; opacity: 0.4; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1><i class="ti ti-wallet"></i> Expense Tracker</h1>
+    <p>Track income & spending. See where your money goes.</p>
+  </header>
+
+  <!-- Summary Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Balance</div>
+      <div class="stat-value" id="s-balance">₹0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Income</div>
+      <div class="stat-value income" id="s-income">₹0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Expenses</div>
+      <div class="stat-value expense" id="s-expense">₹0</div>
+    </div>
+  </div>
+
+  <!-- Add Transaction Form -->
+  <div class="card">
+    <h2>Add transaction</h2>
+    <div class="form-grid">
+
+      <div class="form-group form-full">
+        <label for="f-desc">Description</label>
+        <input type="text" id="f-desc" placeholder="e.g. Grocery shopping" />
+      </div>
+
+      <div class="form-group">
+        <label for="f-amount">Amount (₹)</label>
+        <input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01" />
+      </div>
+
+      <div class="form-group">
+        <label for="f-type">Type</label>
+        <select id="f-type">
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="f-cat">Category</label>
+        <select id="f-cat">
+          <option value="Food">🍔 Food</option>
+          <option value="Transport">🚌 Transport</option>
+          <option value="Shopping">🛍 Shopping</option>
+          <option value="Health">💊 Health</option>
+          <option value="Bills">💡 Bills</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Salary">💼 Salary</option>
+          <option value="Other">📦 Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="f-date">Date</label>
+        <input type="date" id="f-date" />
+      </div>
+
+    </div>
+    <button class="add-btn" onclick="addTx()">
+      <i class="ti ti-plus"></i> Add transaction
+    </button>
+  </div>
+
+  <!-- Transaction List -->
+  <div class="section-head">
+    <h2>Transactions</h2>
+    <div class="filter-btns">
+      <button class="flt active" onclick="setFilter('all', this)">All</button>
+      <button class="flt" onclick="setFilter('income', this)">Income</button>
+      <button class="flt" onclick="setFilter('expense', this)">Expenses</button>
+    </div>
+  </div>
+  <div class="tx-list" id="tx-list"></div>
+
+  <!-- Spending Bars -->
+  <div class="bar-section">
+    <h2>Spending by category</h2>
+    <div class="bar-wrap" id="bar-wrap"></div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Data ────────────────────────────────────────────────────────────────────
+
+  const CAT_COLORS = {
+    Food: '#1D9E75',
+    Transport: '#378ADD',
+    Shopping: '#D4537E',
+    Health: '#D85A30',
+    Bills: '#BA7517',
+    Entertainment: '#7F77DD',
+    Salary: '#639922',
+    Other: '#888780'
+  };
+
+  const CAT_ICONS = {
+    Food: 'ti-salad',
+    Transport: 'ti-bus',
+    Shopping: 'ti-shopping-bag',
+    Health: 'ti-pill',
+    Bills: 'ti-bolt',
+    Entertainment: 'ti-movie',
+    Salary: 'ti-briefcase',
+    Other: 'ti-box'
+  };
+
+  // Sample transactions to start with
+  let transactions = [
+    { id: 1, desc: 'Monthly salary',     amount: 45000, type: 'income',  cat: 'Salary',        date: '2025-06-01' },
+    { id: 2, desc: 'Grocery shopping',   amount: 2200,  type: 'expense', cat: 'Food',          date: '2025-06-02' },
+    { id: 3, desc: 'Metro recharge',     amount: 500,   type: 'expense', cat: 'Transport',     date: '2025-06-03' },
+    { id: 4, desc: 'Netflix subscription',amount: 649,  type: 'expense', cat: 'Entertainment', date: '2025-06-04' },
+    { id: 5, desc: 'Electricity bill',   amount: 1800,  type: 'expense', cat: 'Bills',         date: '2025-06-05' },
+  ];
+
+  let nextId  = 6;
+  let filter  = 'all';
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+  // Format number as Indian rupees
+  function fmt(n) {
+    return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  // Get today's date as YYYY-MM-DD
+  function today() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
+  function render() {
+    renderStats();
+    renderTransactions();
+    renderBars();
+  }
+
+  function renderStats() {
+    const income  = transactions.filter(t => t.type === 'income') .reduce((s, t) => s + t.amount, 0);
+    const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const balance = income - expense;
+
+    document.getElementById('s-income').textContent  = fmt(income);
+    document.getElementById('s-expense').textContent = fmt(expense);
+
+    const balEl = document.getElementById('s-balance');
+    balEl.textContent  = fmt(Math.abs(balance));
+    balEl.style.color  = balance < 0 ? 'var(--red)' : balance > 0 ? 'var(--green)' : '';
+  }
+
+  function renderTransactions() {
+    const shown = filter === 'all'
+      ? transactions
+      : transactions.filter(t => t.type === filter);
+
+    const list = document.getElementById('tx-list');
+
+    if (!shown.length) {
+      list.innerHTML = `
+        <div class="empty">
+          <i class="ti ti-receipt-off"></i>
+          No transactions yet. Add one above!
+        </div>`;
+      return;
+    }
+
+    // Show newest first
+    list.innerHTML = [...shown].reverse().map(t => `
+      <div class="tx">
+        <div class="tx-icon" style="background:${CAT_COLORS[t.cat]}22;">
+          <i class="ti ${CAT_ICONS[t.cat]}" style="color:${CAT_COLORS[t.cat]};"></i>
+        </div>
+        <div class="tx-info">
+          <div class="tx-name">${t.desc}</div>
+          <div class="tx-meta">${t.cat} &middot; ${t.date}</div>
+        </div>
+        <span class="tx-amount ${t.type === 'income' ? 'pos' : 'neg'}">
+          ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
+        </span>
+        <button class="del-btn" onclick="deleteTx(${t.id})" aria-label="Delete">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function renderBars() {
+    // Sum expenses per category
+    const totals = {};
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(t => { totals[t.cat] = (totals[t.cat] || 0) + t.amount; });
+
+    const bw = document.getElementById('bar-wrap');
+    const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+
+    if (!entries.length) {
+      bw.innerHTML = `
+        <div class="empty" style="padding:1rem">
+          <i class="ti ti-chart-bar"></i>
+          No expense data yet
+        </div>`;
+      return;
+    }
+
+    const maxVal = entries[0][1]; // largest value for scaling
+
+    bw.innerHTML = entries.map(([cat, val]) => `
+      <div class="bar-row">
+        <div class="bar-top">
+          <span class="bar-label">
+            <i class="ti ${CAT_ICONS[cat]}" style="font-size:13px;"></i>
+            ${cat}
+          </span>
+          <span class="bar-val">${fmt(val)}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill"
+            style="width:${Math.round(val / maxVal * 100)}%;
+                   background:${CAT_COLORS[cat]};">
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ─── Actions ─────────────────────────────────────────────────────────────────
+
+  function addTx() {
+    const desc   = document.getElementById('f-desc').value.trim();
+    const amount = parseFloat(document.getElementById('f-amount').value);
+    const type   = document.getElementById('f-type').value;
+    const cat    = document.getElementById('f-cat').value;
+    const date   = document.getElementById('f-date').value;
+
+    // Basic validation
+    if (!desc)           { alert('Please enter a description.'); return; }
+    if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+    if (!date)           { alert('Please pick a date.'); return; }
+
+    transactions.push({ id: nextId++, desc, amount, type, cat, date });
+
+    // Reset form (keep date and selects)
+    document.getElementById('f-desc').value   = '';
+    document.getElementById('f-amount').value = '';
+
+    render();
+  }
+
+  function deleteTx(id) {
+    transactions = transactions.filter(t => t.id !== id);
+    render();
+  }
+
+  function setFilter(f, el) {
+    filter = f;
+    document.querySelectorAll('.flt').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderTransactions(); // only the list changes
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────────
+
+  document.getElementById('f-date').value = today();
+  render();
+</script>
+</body>
+</html>
