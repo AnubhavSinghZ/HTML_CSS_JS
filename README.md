@@ -33,7 +33,7 @@ This repository contains practice projects and exercises developed to strengthen
 ## How to Run
 
 1. Clone the repository:
-   git clone https://github.com/your-username/web-development-practice.git
+   git clone https://github.com/AnubhavSinghZ/web_development_practice.git
 
 2. Open the project folder.
 
