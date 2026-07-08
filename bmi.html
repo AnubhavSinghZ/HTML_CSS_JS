@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<h1>Hello Younger</h1>
+<title>BMI Calculator</title>
+<style>
+  /* ---------- Basic page setup ---------- */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+    background: linear-gradient(135deg, #99a5a2 0%, #d8f3ec 100%);
+  }
+
+  /* ---------- The card that holds everything ---------- */
+  .card {
+    background: #ffffff;
+    width: 360px;
+    padding: 32px 28px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(15, 118, 110, 0.15);
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    color: #0f766e;
+  }
+
+  p.subtitle {
+    margin: 0 0 24px;
+    font-size: 13px;
+    color: #789;
+  }
+
+  /* ---------- Input fields ---------- */
+  .field {
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus {
+    border-color: #14b8a6;
+  }
+
+  /* Unit toggle buttons (cm/ft, kg/lb) */
+  .unit-toggle {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .unit-toggle button {
+    flex: 1;
+    padding: 6px;
+    font-size: 12px;
+    border: 2px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #475569;
+    transition: 0.2s;
+  }
+
+  .unit-toggle button.active {
+    background: #14b8a6;
+    border-color: #14b8a6;
+    color: #fff;
+  }
+
+  /* ---------- Calculate button ---------- */
+  .calc-btn {
+    width: 100%;
+    padding: 13px;
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: #0f766e;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .calc-btn:hover {
+    background: #115e59;
+  }
+
+  /* ---------- Result section ---------- */
+  .result {
+    margin-top: 24px;
+    display: none; /* shown by JS once a result exists */
+  }
+
+  .result.visible {
+    display: block;
+  }
+
+  .bmi-value {
+    font-size: 40px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 6px 0 2px;
+  }
+
+  .bmi-category {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* ---------- The gauge (semi-circle meter) ---------- */
+  .gauge-wrap {
+    position: relative;
+    width: 220px;
+    margin: 18px auto 0;
+  }
+
+  .needle {
+    transform-origin: 110px 110px;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>BMI Calculator</h1>
+  <p class="subtitle">Check your Body Mass Index in seconds</p>
+
+  <!-- Height field -->
+  <div class="field">
+    <label for="height">Height (cm)</label>
+    <input type="number" id="height" placeholder="e.g. 170">
+  </div>
+
+  <!-- Weight field -->
+  <div class="field">
+    <label for="weight">Weight (kg)</label>
+    <input type="number" id="weight" placeholder="e.g. 65">
+  </div>
+
+  <button class="calc-btn" onclick="calculateBMI()">Calculate BMI</button>
+
+  <!-- Result section, hidden until a calculation is made -->
+  <div class="result" id="result">
+
+    <!-- Gauge that shows a needle pointing to the BMI range -->
+    <div class="gauge-wrap">
+      <svg viewBox="0 0 220 130" width="220">
+        <!-- Colored arc segments: underweight, normal, overweight, obese -->
+        <path d="M20,110 A90,90 0 0,1 60.7,33.5" stroke="#38bdf8" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <path d="M60.7,33.5 A90,90 0 0,1 110,20" stroke="#34d399" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <path d="M110,20 A90,90 0 0,1 159.3,33.5" stroke="#fbbf24" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <path d="M159.3,33.5 A90,90 0 0,1 200,110" stroke="#f87171" stroke-width="16" fill="none" stroke-linecap="round"/>
+
+        <!-- The needle, rotated by JS based on the BMI value -->
+        <g id="needle" class="needle">
+          <line x1="110" y1="110" x2="110" y2="30" stroke="#0f172a" stroke-width="3"/>
+          <circle cx="110" cy="110" r="7" fill="#0f172a"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="bmi-value" id="bmiValue">--</div>
+    <span class="bmi-category" id="bmiCategory">-</span>
+  </div>
+</div>
+
+<script>
+  // Grab the needle so we can rotate it later
+  const needle = document.getElementById('needle');
+  const resultBox = document.getElementById('result');
+  const bmiValueEl = document.getElementById('bmiValue');
+  const bmiCategoryEl = document.getElementById('bmiCategory');
+
+  function calculateBMI() {
+    // Read the raw input values
+    const heightCm = parseFloat(document.getElementById('height').value);
+    const weightKg = parseFloat(document.getElementById('weight').value);
+
+    // Basic check so the calculator doesn't break on empty/invalid input
+    if (!heightCm || !weightKg || heightCm <= 0 || weightKg <= 0) {
+      alert('Please enter a valid height and weight.');
+      return;
+    }
+
+    // The actual BMI formula: weight (kg) / height (m) squared
+    const heightM = heightCm / 100;
+    const bmi = weightKg / (heightM * heightM);
+    const bmiRounded = bmi.toFixed(1);
+
+    // Figure out the category and its color
+    let category = '';
+    let color = '';
+
+    if (bmi < 18.5) {
+      category = 'Underweight';
+      color = '#38bdf8';
+    } else if (bmi < 25) {
+      category = 'Normal';
+      color = '#34d399';
+    } else if (bmi < 30) {
+      category = 'Overweight';
+      color = '#fbbf24';
+    } else {
+      category = 'Obese';
+      color = '#f87171';
+    }
+
+    // Update the text on the page
+    bmiValueEl.textContent = bmiRounded;
+    bmiCategoryEl.textContent = category;
+    bmiCategoryEl.style.backgroundColor = color;
+
+    // Rotate the needle to point at the right spot on the gauge.
+    // The gauge spans from -90deg (far left) to +90deg (far right).
+    // We map BMI values from 10 (very low) to 40 (very high) onto that range.
+    const minBMI = 10;
+    const maxBMI = 40;
+    const clampedBMI = Math.min(Math.max(bmi, minBMI), maxBMI);
+    const angle = ((clampedBMI - minBMI) / (maxBMI - minBMI)) * 180 - 90;
+
+    needle.style.transform = `rotate(${angle}deg)`;
+
+    // Reveal the result section
+    resultBox.classList.add('visible');
+  }
+</script>
+
+</body>
+</html>
